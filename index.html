@@ -412,6 +412,15 @@
                     <p style="color: var(--muted); margin-bottom: 1.5rem;">Browse the contributions already on deck and see how many seats are spoken for.</p>
                     <div id="rsvp-list" class="rsvp-list"></div>
                     <div id="empty-state" class="empty-state" hidden>No RSVPs yet. Be the first to set the table!</div>
+                    <p
+                        id="data-error"
+                        class="admin-status"
+                        role="alert"
+                        hidden
+                        style="margin-top: 1rem;"
+                    >
+                        Unable to load RSVPs right now. Please try again later.
+                    </p>
                 </div>
             </div>
         </section>
@@ -464,7 +473,7 @@
     </template>
 
     <script>
-        const RSVP_STORAGE_KEY = 'thanksgiving-rsvps';
+        const API_BASE_URL = '/api/rsvps';
         const ADMIN_USERNAME = 'ttoulouse';
         const ADMIN_PASSWORD = '1Em0nz$%';
 
@@ -478,6 +487,7 @@
         const adminLoginForm = document.getElementById('admin-login-form');
         const adminLoginError = document.getElementById('admin-login-error');
         const adminLogoutButton = document.getElementById('admin-logout');
+        const dataError = document.getElementById('data-error');
 
         const contributionFieldsContainer = document.getElementById('contribution-fields');
         const addContributionButton = document.getElementById('add-contribution');
@@ -556,6 +566,96 @@
                 .map((input) => input.value.trim())
                 .filter(Boolean);
 
+        const hideDataError = () => {
+            if (dataError) {
+                dataError.textContent = '';
+                dataError.hidden = true;
+            }
+        };
+
+        const showDataError = (message) => {
+            if (dataError) {
+                dataError.textContent = message;
+                dataError.hidden = false;
+            }
+        };
+
+        const fetchRsvpsFromServer = async () => {
+            try {
+                const response = await fetch(API_BASE_URL, { cache: 'no-store' });
+                if (!response.ok) {
+                    throw new Error('Unable to load RSVPs right now. Please try again later.');
+                }
+                const data = await response.json();
+                entries = Array.isArray(data) ? data : [];
+                hideDataError();
+            } catch (error) {
+                console.error('Failed to load RSVPs', error);
+                entries = [];
+                showDataError(error.message || 'Unable to load RSVPs right now. Please try again later.');
+            }
+            refreshViews();
+        };
+
+        const submitToServer = async (url, method, payload) => {
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!response.ok) {
+                    let message = 'Request failed. Please try again.';
+                    try {
+                        const details = await response.json();
+                        if (details?.message) {
+                            message = details.message;
+                        }
+                    } catch (parseError) {
+                        // Ignore JSON parse errors
+                    }
+                    throw new Error(message);
+                }
+
+                return response.status === 204 ? null : response.json();
+            } catch (networkError) {
+                console.error('Network error while talking to the RSVP server', networkError);
+                throw new Error('Request failed. Please check your connection and try again.');
+            }
+        };
+
+        const createRsvpOnServer = (payload) => submitToServer(API_BASE_URL, 'POST', payload);
+
+        const updateRsvpOnServer = (id, payload) =>
+            submitToServer(`${API_BASE_URL}/${encodeURIComponent(id)}`, 'PUT', payload);
+
+        const deleteRsvpOnServer = async (id) => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/${encodeURIComponent(id)}`, {
+                    method: 'DELETE',
+                });
+
+                if (response.status === 204 || response.status === 404) {
+                    return;
+                }
+
+                let message = 'Unable to remove RSVP right now.';
+                try {
+                    const details = await response.json();
+                    if (details?.message) {
+                        message = details.message;
+                    }
+                } catch (parseError) {
+                    // Ignore JSON parse errors
+                }
+                throw new Error(message);
+            } catch (networkError) {
+                console.error('Network error while deleting an RSVP', networkError);
+                throw new Error('Unable to remove RSVP right now. Please try again later.');
+            }
+        };
+
         addContributionButton.addEventListener('click', () => {
             contributionFieldsContainer.appendChild(createContributionField());
             updateContributionControls();
@@ -580,36 +680,6 @@
 
         setContributionFields({ contributions: [] });
 
-        const loadRsvps = () => {
-            try {
-                const stored = localStorage.getItem(RSVP_STORAGE_KEY);
-                return stored ? JSON.parse(stored) : [];
-            } catch (err) {
-                console.error('Unable to load RSVPs', err);
-                return [];
-            }
-        };
-
-        const saveRsvps = (entries) => {
-            try {
-                localStorage.setItem(RSVP_STORAGE_KEY, JSON.stringify(entries));
-            } catch (err) {
-                console.error('Unable to save RSVP', err);
-            }
-        };
-
-        const ensureIds = (list) =>
-            list.map((entry) => {
-                const createdAt = entry.createdAt || Date.now();
-                const { potluckItem, ...rest } = entry;
-                return {
-                    ...rest,
-                    contributions: extractContributions(entry),
-                    createdAt,
-                    id: entry.id || `${createdAt}-${Math.random().toString(16).slice(2)}`,
-                };
-            });
-
         const setSubmitLabel = () => {
             const submitButton = form.querySelector('button[type="submit"]');
             submitButton.textContent = editingId ? 'Update RSVP' : 'Reserve My Seat';
@@ -626,7 +696,8 @@
         const renderRsvps = (list) => {
             rsvpList.innerHTML = '';
             if (!list.length) {
-                emptyState.hidden = false;
+                const hasError = dataError && !dataError.hidden;
+                emptyState.hidden = hasError;
                 return;
             }
             emptyState.hidden = true;
@@ -661,7 +732,8 @@
         const renderAdminList = (list) => {
             adminList.innerHTML = '';
             if (!list.length) {
-                adminEmpty.hidden = false;
+                const hasError = dataError && !dataError.hidden;
+                adminEmpty.hidden = hasError;
                 return;
             }
             adminEmpty.hidden = true;
@@ -712,12 +784,17 @@
                 const deleteButton = document.createElement('button');
                 deleteButton.type = 'button';
                 deleteButton.textContent = 'Remove';
-                deleteButton.addEventListener('click', () => {
-                    entries = entries.filter((item) => item.id !== entry.id);
-                    saveRsvps(entries);
-                    refreshViews();
-                    if (editingId === entry.id) {
-                        resetForm();
+                deleteButton.addEventListener('click', async () => {
+                    try {
+                        await deleteRsvpOnServer(entry.id);
+                        if (editingId === entry.id) {
+                            resetForm();
+                        }
+                        hideDataError();
+                        await fetchRsvpsFromServer();
+                    } catch (error) {
+                        console.error('Failed to delete RSVP', error);
+                        showDataError(error.message || 'Unable to remove RSVP right now.');
                     }
                 });
 
@@ -734,12 +811,10 @@
             renderAdminList(sorted);
         };
 
-        entries = ensureIds(loadRsvps());
-        saveRsvps(entries);
-        refreshViews();
         setSubmitLabel();
+        fetchRsvpsFromServer();
 
-        form.addEventListener('submit', (event) => {
+        form.addEventListener('submit', async (event) => {
             event.preventDefault();
             const formData = new FormData(form);
             const guestName = (formData.get('guestName') || '').trim();
@@ -757,25 +832,20 @@
                 notes,
                 contributions,
             };
-            const timestamp = Date.now();
 
-            if (editingId) {
-                entries = entries.map((item) =>
-                    item.id === editingId
-                        ? { ...item, ...entry, updatedAt: timestamp }
-                        : item
-                );
-            } else {
-                entries.push({
-                    ...entry,
-                    id: `${timestamp}-${Math.random().toString(16).slice(2)}`,
-                    createdAt: timestamp,
-                });
+            try {
+                if (editingId) {
+                    await updateRsvpOnServer(editingId, entry);
+                } else {
+                    await createRsvpOnServer(entry);
+                }
+                hideDataError();
+                await fetchRsvpsFromServer();
+                resetForm();
+            } catch (error) {
+                console.error('Failed to save RSVP', error);
+                showDataError(error.message || 'Unable to save your RSVP right now. Please try again later.');
             }
-
-            saveRsvps(entries);
-            refreshViews();
-            resetForm();
         });
 
         adminLoginForm.addEventListener('submit', (event) => {
