@@ -96,6 +96,12 @@ const sanitizePayload = (payload) => {
     };
 };
 
+const applyCorsHeaders = (res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+};
+
 const sendJson = (res, statusCode, data) => {
     if (statusCode === 204 || data === null || typeof data === 'undefined') {
         res.writeHead(statusCode, {
@@ -114,6 +120,13 @@ const sendJson = (res, statusCode, data) => {
 };
 
 const handleApiRequest = async (req, res, pathname) => {
+    applyCorsHeaders(res);
+
+    if (req.method === 'OPTIONS') {
+        sendJson(res, 204, null);
+        return true;
+    }
+
     if (pathname === '/api/rsvps') {
         if (req.method === 'GET') {
             const entries = await readJsonFile();
