@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thanksgiving RSVP Feast</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            color-scheme: light dark;
+            --bg-gradient: radial-gradient(circle at top, #ffedd5, #fde68a 35%, #f59e0b 70%, #78350f 100%);
+            --card-bg: rgba(255, 255, 255, 0.82);
+            --card-border: rgba(255, 255, 255, 0.3);
+            --accent: #b45309;
+            --accent-dark: #92400e;
+            --accent-light: #fbbf24;
+            --text-dark: #3f2f1c;
+            --muted: rgba(63, 47, 28, 0.7);
+            --chip-bg: rgba(255, 255, 255, 0.6);
+            --chip-border: rgba(250, 204, 21, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Work Sans', system-ui, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: clamp(1.5rem, 3vw, 4rem);
+            backdrop-filter: blur(4px);
+        }
+
+        header {
+            text-align: center;
+            max-width: 960px;
+            margin-bottom: clamp(2rem, 4vw, 4rem);
+            position: relative;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            inset: -2rem;
+            z-index: -1;
+            background: url('https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?auto=format&fit=crop&w=1400&q=80') center/cover no-repeat;
+            filter: blur(60px) saturate(120%);
+            opacity: 0.45;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 0.25rem;
+            color: #7f1d1d;
+            text-shadow: 0 10px 30px rgba(127, 29, 29, 0.25);
+        }
+
+        .subtitle {
+            font-size: clamp(1.1rem, 2.3vw, 1.6rem);
+            color: var(--muted);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        main {
+            width: min(1100px, 100%);
+            display: grid;
+            gap: clamp(1.5rem, 3vw, 2.5rem);
+        }
+
+        .glass-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            padding: clamp(1.75rem, 3vw, 2.75rem);
+            box-shadow: 0 30px 60px -25px rgba(120, 53, 15, 0.5);
+            backdrop-filter: blur(12px);
+        }
+
+        .rsvp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: clamp(1.5rem, 3vw, 2rem);
+        }
+
+        form {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        label {
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            color: var(--accent-dark);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.9rem 1.1rem;
+            border-radius: 16px;
+            border: 1px solid rgba(180, 83, 9, 0.25);
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.8);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.35);
+            transform: translateY(-2px);
+        }
+
+        button {
+            padding: 1rem 1.75rem;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, #f97316, #b45309 70%);
+            color: #fff;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 18px 35px -18px rgba(127, 29, 29, 0.7);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        button:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 20px 40px -18px rgba(127, 29, 29, 0.85);
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px dashed rgba(180, 83, 9, 0.4);
+            margin: 2rem 0 1rem;
+        }
+
+        .rsvp-list {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .rsvp-card {
+            padding: 1.1rem 1.3rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(250, 204, 21, 0.4);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .rsvp-card h3 {
+            margin: 0;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+        }
+
+        .rsvp-meta {
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.45rem 0.9rem;
+            border-radius: 999px;
+            background: var(--chip-bg);
+            border: 1px solid var(--chip-border);
+            font-size: 0.85rem;
+            letter-spacing: 0.03em;
+        }
+
+        .potluck-board {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .potluck-item {
+            padding: 1.4rem;
+            border-radius: 24px;
+            background: rgba(255, 248, 237, 0.9);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            box-shadow: 0 16px 30px -20px rgba(127, 29, 29, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .potluck-item::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.12), rgba(234, 179, 8, 0.1));
+            pointer-events: none;
+        }
+
+        .potluck-item h4 {
+            margin: 0 0 0.5rem;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: #7f1d1d;
+        }
+
+        .potluck-item .status {
+            font-size: 0.85rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .status.available {
+            color: #047857;
+        }
+
+        .status.claimed {
+            color: #b91c1c;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px dashed rgba(180, 83, 9, 0.35);
+            border-radius: 22px;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        footer {
+            margin-top: clamp(3rem, 6vw, 5rem);
+            text-align: center;
+            color: rgba(63, 47, 28, 0.6);
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1.5rem;
+            }
+
+            .rsvp-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Friendsgiving RSVP Lounge</h1>
+        <p class="subtitle">
+            Gather around our digital harvest table! RSVP below with your crew size and potluck specialty so everyone can see what delights are coming to the feast.
+        </p>
+    </header>
+
+    <main>
+        <section class="glass-panel">
+            <div class="rsvp-grid">
+                <form id="rsvp-form">
+                    <div>
+                        <label for="guest-name">Your Name</label>
+                        <input type="text" id="guest-name" name="guestName" placeholder="e.g., Alex Thompson" required />
+                    </div>
+
+                    <div>
+                        <label for="guest-count">How many are joining?</label>
+                        <input type="number" id="guest-count" name="guestCount" min="1" max="12" value="1" required />
+                    </div>
+
+                    <div>
+                        <label for="potluck-item">What signature dish are you bringing?</label>
+                        <input type="text" id="potluck-item" name="potluckItem" placeholder="e.g., Maple Roasted Brussels Sprouts" required />
+                    </div>
+
+                    <div>
+                        <label for="notes">Special notes (dietary needs, timing, etc.)</label>
+                        <textarea id="notes" name="notes" rows="3" placeholder="Optional"></textarea>
+                    </div>
+
+                    <button type="submit">Reserve My Seat</button>
+                </form>
+
+                <div>
+                    <h2 style="font-family: 'Playfair Display', serif; margin-top: 0; color: #7f1d1d;">Who's bringing what</h2>
+                    <p style="color: var(--muted); margin-bottom: 1.5rem;">Check the lineup before you commit—claim something new or double up on the favorites.</p>
+                    <div id="rsvp-list" class="rsvp-list"></div>
+                    <div id="empty-state" class="empty-state" hidden>No RSVPs yet. Be the first to set the table!</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass-panel">
+            <h2 style="font-family: 'Playfair Display', serif; margin-top: 0; color: #7f1d1d;">Potluck vision board</h2>
+            <p style="color: var(--muted); margin-bottom: 1.5rem;">See what's already claimed and what the feast still craves. Tap an idea before it's gone!</p>
+            <div id="potluck-board" class="potluck-board"></div>
+        </section>
+    </main>
+
+    <footer>
+        Crafted with gratitude and good vibes. Save room for dessert! 🍂
+    </footer>
+
+    <template id="rsvp-template">
+        <article class="rsvp-card">
+            <div>
+                <h3 class="name"></h3>
+                <div class="rsvp-meta">
+                    <span class="badge guests"></span>
+                    <span class="badge dish"></span>
+                </div>
+            </div>
+            <p class="notes" style="margin: 0; max-width: 280px;"></p>
+        </article>
+    </template>
+
+    <template id="potluck-template">
+        <article class="potluck-item">
+            <h4 class="title"></h4>
+            <p class="status"></p>
+            <p class="claimed-by" style="margin-top: 0.75rem; color: var(--muted);"></p>
+        </article>
+    </template>
+
+    <script>
+        const RSVP_STORAGE_KEY = 'friendsgiving-rsvps';
+        const potluckIdeas = [
+            'Herb Butter Turkey',
+            'Garlic Mashed Potatoes',
+            'Cranberry Orange Relish',
+            'Sourdough Stuffing',
+            'Roasted Root Veggies',
+            'Sweet Potato Casserole',
+            'Autumn Harvest Salad',
+            'Pumpkin Cheesecake',
+            'Pecan Pie Bars',
+            'Mulled Cider Station',
+            'Charcuterie & Cheese Board',
+            'Vegan Main Course'
+        ];
+
+        const form = document.getElementById('rsvp-form');
+        const rsvpList = document.getElementById('rsvp-list');
+        const emptyState = document.getElementById('empty-state');
+        const potluckBoard = document.getElementById('potluck-board');
+
+        const rsvpTemplate = document.getElementById('rsvp-template');
+        const potluckTemplate = document.getElementById('potluck-template');
+
+        const loadRsvps = () => {
+            try {
+                const stored = localStorage.getItem(RSVP_STORAGE_KEY);
+                return stored ? JSON.parse(stored) : [];
+            } catch (err) {
+                console.error('Unable to load RSVPs', err);
+                return [];
+            }
+        };
+
+        const saveRsvps = (entries) => {
+            try {
+                localStorage.setItem(RSVP_STORAGE_KEY, JSON.stringify(entries));
+            } catch (err) {
+                console.error('Unable to save RSVP', err);
+            }
+        };
+
+        const renderRsvps = (entries) => {
+            rsvpList.innerHTML = '';
+            if (!entries.length) {
+                emptyState.hidden = false;
+                return;
+            }
+            emptyState.hidden = true;
+
+            entries.forEach((entry) => {
+                const node = rsvpTemplate.content.cloneNode(true);
+                node.querySelector('.name').textContent = entry.guestName;
+                node.querySelector('.guests').textContent = `${entry.guestCount} attending`;
+                node.querySelector('.dish').textContent = entry.potluckItem;
+                const notesEl = node.querySelector('.notes');
+                if (entry.notes) {
+                    notesEl.textContent = entry.notes;
+                    notesEl.hidden = false;
+                } else {
+                    notesEl.hidden = true;
+                }
+                rsvpList.appendChild(node);
+            });
+        };
+
+        const renderPotluckBoard = (entries) => {
+            const claimedMap = new Map(entries.map((entry) => [entry.potluckItem.toLowerCase(), entry.guestName]));
+            potluckBoard.innerHTML = '';
+
+            potluckIdeas.forEach((idea) => {
+                const node = potluckTemplate.content.cloneNode(true);
+                node.querySelector('.title').textContent = idea;
+                const claimedBy = claimedMap.get(idea.toLowerCase());
+                const statusEl = node.querySelector('.status');
+                const claimedText = node.querySelector('.claimed-by');
+
+                if (claimedBy) {
+                    statusEl.textContent = 'Claimed';
+                    statusEl.classList.add('claimed');
+                    claimedText.textContent = `Handled with care by ${claimedBy}.`;
+                } else {
+                    statusEl.textContent = 'Available';
+                    statusEl.classList.add('available');
+                    claimedText.textContent = 'Still up for grabs—put your spin on it!';
+                }
+
+                potluckBoard.appendChild(node);
+            });
+        };
+
+        const entries = loadRsvps();
+        renderRsvps(entries);
+        renderPotluckBoard(entries);
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const formData = new FormData(form);
+            const entry = Object.fromEntries(formData.entries());
+            entry.guestCount = Number(entry.guestCount) || 1;
+            entry.createdAt = Date.now();
+
+            const currentEntries = loadRsvps();
+            currentEntries.push(entry);
+            currentEntries.sort((a, b) => a.createdAt - b.createdAt);
+            saveRsvps(currentEntries);
+            renderRsvps(currentEntries);
+            renderPotluckBoard(currentEntries);
+            form.reset();
+            form.querySelector('#guest-count').value = 1;
+        });
+    </script>
+</body>
+</html>
