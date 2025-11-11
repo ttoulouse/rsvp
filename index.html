@@ -153,6 +153,62 @@
             margin-top: 1.5rem;
         }
 
+        .dynamic-inputs {
+            display: grid;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .contribution-field {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .contribution-field input {
+            flex: 1;
+        }
+
+        .remove-field {
+            border: none;
+            background: rgba(127, 29, 29, 0.1);
+            color: #7f1d1d;
+            font-size: 1.2rem;
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 50%;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .remove-field:hover {
+            background: rgba(127, 29, 29, 0.18);
+            transform: translateY(-1px);
+        }
+
+        .add-field-button {
+            margin-top: 0.75rem;
+            padding: 0.6rem 1rem;
+            border-radius: 999px;
+            border: 1px dashed rgba(127, 29, 29, 0.4);
+            background: rgba(255, 255, 255, 0.8);
+            color: #7f1d1d;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .add-field-button:hover {
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px -18px rgba(127, 29, 29, 0.7);
+        }
+
         .rsvp-card {
             padding: 1.1rem 1.3rem;
             border-radius: 20px;
@@ -327,8 +383,20 @@
                     </div>
 
                     <div>
-                        <label for="potluck-item">What signature dish are you bringing?</label>
-                        <input type="text" id="potluck-item" name="potluckItem" placeholder="e.g., Maple Roasted Brussels Sprouts" required />
+                        <label for="contribution-1">What will you contribute?</label>
+                        <div class="dynamic-inputs" id="contribution-fields">
+                            <div class="contribution-field">
+                                <input
+                                    type="text"
+                                    id="contribution-1"
+                                    name="contributions"
+                                    placeholder="e.g., Maple Roasted Brussels Sprouts or sparkling cider"
+                                    required
+                                />
+                                <button type="button" class="remove-field" aria-label="Remove item" hidden>&times;</button>
+                            </div>
+                        </div>
+                        <button type="button" class="add-field-button" id="add-contribution">Add another item</button>
                     </div>
 
                     <div>
@@ -341,7 +409,7 @@
 
                 <div>
                     <h2 style="font-family: 'Playfair Display', serif; margin-top: 0; color: #7f1d1d;">Who's bringing what</h2>
-                    <p style="color: var(--muted); margin-bottom: 1.5rem;">Browse the dishes already on deck and see how many seats are spoken for.</p>
+                    <p style="color: var(--muted); margin-bottom: 1.5rem;">Browse the contributions already on deck and see how many seats are spoken for.</p>
                     <div id="rsvp-list" class="rsvp-list"></div>
                     <div id="empty-state" class="empty-state" hidden>No RSVPs yet. Be the first to set the table!</div>
                 </div>
@@ -388,7 +456,7 @@
                 <h3 class="name"></h3>
                 <div class="rsvp-meta">
                     <span class="badge guests"></span>
-                    <span class="badge dish"></span>
+                    <span class="badge contributions"></span>
                 </div>
             </div>
             <p class="notes" style="margin: 0; max-width: 280px;"></p>
@@ -411,9 +479,106 @@
         const adminLoginError = document.getElementById('admin-login-error');
         const adminLogoutButton = document.getElementById('admin-logout');
 
+        const contributionFieldsContainer = document.getElementById('contribution-fields');
+        const addContributionButton = document.getElementById('add-contribution');
+        const contributionPlaceholder =
+            'e.g., Maple Roasted Brussels Sprouts or sparkling cider';
         const rsvpTemplate = document.getElementById('rsvp-template');
         let entries = [];
         let editingId = null;
+
+        const createContributionField = (value = '') => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'contribution-field';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'contributions';
+            input.placeholder = contributionPlaceholder;
+            input.value = value;
+            wrapper.appendChild(input);
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'remove-field';
+            removeButton.setAttribute('aria-label', 'Remove item');
+            removeButton.textContent = '×';
+            wrapper.appendChild(removeButton);
+
+            return wrapper;
+        };
+
+        const updateContributionControls = () => {
+            const fields = contributionFieldsContainer.querySelectorAll('.contribution-field');
+            fields.forEach((field, index) => {
+                const input = field.querySelector('input');
+                const removeButton = field.querySelector('.remove-field');
+                const isPrimary = index === 0;
+                input.required = isPrimary;
+                if (isPrimary) {
+                    input.id = 'contribution-1';
+                    if (removeButton) {
+                        removeButton.hidden = fields.length === 1;
+                    }
+                } else {
+                    input.removeAttribute('id');
+                    if (removeButton) {
+                        removeButton.hidden = false;
+                    }
+                }
+            });
+        };
+
+        const extractContributions = (entry) => {
+            if (Array.isArray(entry?.contributions)) {
+                return entry.contributions.map((item) => item?.trim()).filter(Boolean);
+            }
+            if (typeof entry?.potluckItem === 'string') {
+                const value = entry.potluckItem.trim();
+                return value ? [value] : [];
+            }
+            return [];
+        };
+
+        const setContributionFields = (entry) => {
+            const contributions = extractContributions(entry);
+            contributionFieldsContainer.innerHTML = '';
+            const values = contributions.length ? contributions : [''];
+            values.forEach((value) => {
+                const field = createContributionField(value);
+                contributionFieldsContainer.appendChild(field);
+            });
+            updateContributionControls();
+        };
+
+        const getContributionValues = () =>
+            Array.from(contributionFieldsContainer.querySelectorAll('input[name="contributions"]'))
+                .map((input) => input.value.trim())
+                .filter(Boolean);
+
+        addContributionButton.addEventListener('click', () => {
+            contributionFieldsContainer.appendChild(createContributionField());
+            updateContributionControls();
+            const newest = contributionFieldsContainer.querySelector('.contribution-field:last-child input');
+            if (newest) {
+                newest.focus();
+            }
+        });
+
+        contributionFieldsContainer.addEventListener('click', (event) => {
+            if (event.target.classList.contains('remove-field')) {
+                const field = event.target.closest('.contribution-field');
+                if (field) {
+                    field.remove();
+                    if (!contributionFieldsContainer.children.length) {
+                        contributionFieldsContainer.appendChild(createContributionField());
+                    }
+                    updateContributionControls();
+                }
+            }
+        });
+
+        setContributionFields({ contributions: [] });
 
         const loadRsvps = () => {
             try {
@@ -436,8 +601,10 @@
         const ensureIds = (list) =>
             list.map((entry) => {
                 const createdAt = entry.createdAt || Date.now();
+                const { potluckItem, ...rest } = entry;
                 return {
-                    ...entry,
+                    ...rest,
+                    contributions: extractContributions(entry),
                     createdAt,
                     id: entry.id || `${createdAt}-${Math.random().toString(16).slice(2)}`,
                 };
@@ -451,6 +618,7 @@
         const resetForm = () => {
             form.reset();
             form.querySelector('#guest-count').value = 1;
+            setContributionFields({ contributions: [] });
             editingId = null;
             setSubmitLabel();
         };
@@ -467,7 +635,15 @@
                 const node = rsvpTemplate.content.cloneNode(true);
                 node.querySelector('.name').textContent = entry.guestName;
                 node.querySelector('.guests').textContent = `${entry.guestCount} attending`;
-                node.querySelector('.dish').textContent = entry.potluckItem;
+                const contributionBadge = node.querySelector('.contributions');
+                const contributionList = Array.isArray(entry.contributions)
+                    ? entry.contributions
+                    : typeof entry.potluckItem === 'string'
+                    ? [entry.potluckItem]
+                    : [];
+                contributionBadge.textContent = contributionList.length
+                    ? contributionList.join(', ')
+                    : 'No items listed';
                 const notesEl = node.querySelector('.notes');
                 if (entry.notes) {
                     notesEl.textContent = entry.notes;
@@ -498,10 +674,17 @@
                 nameEl.textContent = entry.guestName;
                 wrapper.appendChild(nameEl);
 
-                const dishEl = document.createElement('span');
-                dishEl.className = 'admin-meta';
-                dishEl.textContent = `${entry.guestCount} attending · ${entry.potluckItem}`;
-                wrapper.appendChild(dishEl);
+                const contributionDetails = Array.isArray(entry.contributions)
+                    ? entry.contributions
+                    : typeof entry.potluckItem === 'string'
+                    ? [entry.potluckItem]
+                    : [];
+
+                const contributionEl = document.createElement('span');
+                contributionEl.className = 'admin-meta';
+                const contributionLabel = contributionDetails.length ? contributionDetails.join(', ') : 'No items listed';
+                contributionEl.textContent = `${entry.guestCount} attending · ${contributionLabel}`;
+                wrapper.appendChild(contributionEl);
 
                 if (entry.notes) {
                     const notesEl = document.createElement('span');
@@ -520,7 +703,7 @@
                     editingId = entry.id;
                     form.guestName.value = entry.guestName;
                     form.guestCount.value = entry.guestCount;
-                    form.potluckItem.value = entry.potluckItem;
+                    setContributionFields(entry);
                     form.notes.value = entry.notes || '';
                     setSubmitLabel();
                     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -559,21 +742,33 @@
         form.addEventListener('submit', (event) => {
             event.preventDefault();
             const formData = new FormData(form);
-            const entry = Object.fromEntries(formData.entries());
-            entry.guestCount = Number(entry.guestCount) || 1;
+            const guestName = (formData.get('guestName') || '').trim();
+            const guestCount = Number(formData.get('guestCount')) || 1;
+            const notes = (formData.get('notes') || '').trim();
+            const contributions = getContributionValues();
+
+            if (!guestName || !contributions.length) {
+                return;
+            }
+
+            const entry = {
+                guestName,
+                guestCount,
+                notes,
+                contributions,
+            };
             const timestamp = Date.now();
 
             if (editingId) {
                 entries = entries.map((item) =>
                     item.id === editingId
-                        ? { ...item, ...entry, guestCount: entry.guestCount, updatedAt: timestamp }
+                        ? { ...item, ...entry, updatedAt: timestamp }
                         : item
                 );
             } else {
                 entries.push({
                     ...entry,
                     id: `${timestamp}-${Math.random().toString(16).slice(2)}`,
-                    guestCount: entry.guestCount,
                     createdAt: timestamp,
                 });
             }
