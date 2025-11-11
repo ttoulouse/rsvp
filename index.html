@@ -39,6 +39,85 @@
             backdrop-filter: blur(4px);
         }
 
+        body.is-mobile {
+            align-items: stretch;
+            padding: clamp(1rem, 5vw, 1.75rem);
+        }
+
+        body.is-mobile header,
+        body.is-mobile main,
+        body.is-mobile footer {
+            width: 100%;
+        }
+
+        body.is-mobile header {
+            margin-bottom: 2.5rem;
+        }
+
+        body.is-mobile header::after {
+            inset: -1.25rem;
+            opacity: 0.5;
+            filter: blur(40px) saturate(115%);
+        }
+
+        body.is-mobile .glass-panel {
+            padding: clamp(1.25rem, 4vw, 1.75rem);
+            border-radius: 22px;
+        }
+
+        body.is-mobile .rsvp-grid {
+            grid-template-columns: 1fr;
+        }
+
+        body.is-mobile .rsvp-list,
+        body.is-mobile .admin-portal {
+            gap: 1.25rem;
+        }
+
+        body.is-mobile form button[type='submit'],
+        body.is-mobile .add-field-button {
+            width: 100%;
+        }
+
+        body.is-mobile .contribution-field {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        body.is-mobile .remove-field {
+            align-self: flex-end;
+        }
+
+        body.is-mobile .rsvp-card {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        body.is-mobile .rsvp-card .notes {
+            max-width: 100%;
+        }
+
+        body.is-mobile .rsvp-meta {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.6rem;
+        }
+
+        body.is-mobile .admin-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        body.is-mobile .admin-actions button,
+        body.is-mobile .admin-login-form button,
+        body.is-mobile #admin-logout {
+            width: 100%;
+        }
+
+        body.is-mobile textarea {
+            min-height: 120px;
+        }
+
         header {
             text-align: center;
             max-width: 960px;
@@ -348,14 +427,39 @@
             letter-spacing: 0.05em;
         }
 
-        @media (max-width: 600px) {
-            body {
-                padding: 1.5rem;
+        @media (max-width: 720px) {
+            header::after {
+                inset: -1.5rem;
             }
 
-            .rsvp-card {
-                flex-direction: column;
-                align-items: flex-start;
+            .glass-panel {
+                padding: clamp(1.5rem, 5vw, 2rem);
+            }
+        }
+
+        @media (max-width: 520px) {
+            h1 {
+                font-size: clamp(2.1rem, 8vw, 2.6rem);
+            }
+
+            .subtitle {
+                font-size: 0.95rem;
+            }
+
+            label {
+                font-size: 0.75rem;
+            }
+
+            input,
+            select,
+            textarea {
+                padding: 0.75rem 1rem;
+                font-size: 0.95rem;
+            }
+
+            button {
+                padding: 0.85rem 1.2rem;
+                font-size: 0.95rem;
             }
         }
     </style>
@@ -473,6 +577,25 @@
     </template>
 
     <script>
+        const mobileMediaQuery = window.matchMedia('(max-width: 720px)');
+        const updateMobileClass = () => {
+            const isMobileDevice =
+                /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent) || mobileMediaQuery.matches;
+            document.body.classList.toggle('is-mobile', isMobileDevice);
+        };
+
+        updateMobileClass();
+
+        const handleMediaChange = () => updateMobileClass();
+        if (typeof mobileMediaQuery.addEventListener === 'function') {
+            mobileMediaQuery.addEventListener('change', handleMediaChange);
+        } else if (typeof mobileMediaQuery.addListener === 'function') {
+            mobileMediaQuery.addListener(handleMediaChange);
+        }
+
+        window.addEventListener('orientationchange', updateMobileClass);
+        window.addEventListener('resize', updateMobileClass);
+
         const API_BASE_URL = '/api/rsvps';
         const ADMIN_USERNAME = 'ttoulouse';
         const ADMIN_PASSWORD = '1Em0nz$%';
