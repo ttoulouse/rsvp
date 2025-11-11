@@ -1,0 +1,14 @@
+{
+  "name": "rsvp",
+  "version": "1.0.0",
+  "description": "Thanksgiving RSVP web application with server-side storage",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"No automated tests configured\" && exit 0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
