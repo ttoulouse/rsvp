@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Thanksgiving RSVP Feast</title>
+    <title>Thanksgiving RSVP Hub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -191,52 +191,6 @@
             letter-spacing: 0.03em;
         }
 
-        .potluck-board {
-            display: grid;
-            gap: 1rem;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        }
-
-        .potluck-item {
-            padding: 1.4rem;
-            border-radius: 24px;
-            background: rgba(255, 248, 237, 0.9);
-            border: 1px solid rgba(245, 158, 11, 0.35);
-            box-shadow: 0 16px 30px -20px rgba(127, 29, 29, 0.5);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .potluck-item::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(249, 115, 22, 0.12), rgba(234, 179, 8, 0.1));
-            pointer-events: none;
-        }
-
-        .potluck-item h4 {
-            margin: 0 0 0.5rem;
-            font-family: 'Playfair Display', serif;
-            font-size: 1.2rem;
-            color: #7f1d1d;
-        }
-
-        .potluck-item .status {
-            font-size: 0.85rem;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .status.available {
-            color: #047857;
-        }
-
-        .status.claimed {
-            color: #b91c1c;
-        }
-
         .empty-state {
             text-align: center;
             padding: 2rem;
@@ -245,6 +199,89 @@
             border-radius: 22px;
             color: var(--muted);
             font-style: italic;
+        }
+
+        .admin-portal {
+            margin-top: clamp(2rem, 4vw, 3rem);
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .admin-portal h2 {
+            font-family: 'Playfair Display', serif;
+            margin: 0;
+            color: #7f1d1d;
+        }
+
+        .admin-card {
+            background: rgba(255, 255, 255, 0.75);
+            border-radius: 22px;
+            border: 1px solid rgba(250, 204, 21, 0.35);
+            padding: 1.5rem;
+            box-shadow: 0 18px 32px -20px rgba(127, 29, 29, 0.45);
+        }
+
+        .admin-login-form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .admin-login-form button {
+            justify-self: start;
+        }
+
+        .admin-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .admin-row {
+            display: grid;
+            gap: 0.5rem;
+            padding: 1rem 1.2rem;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(180, 83, 9, 0.25);
+        }
+
+        .admin-row strong {
+            font-family: 'Playfair Display', serif;
+            color: #7f1d1d;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .admin-actions button {
+            padding: 0.6rem 1.2rem;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #f97316, #b45309 70%);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-weight: 600;
+            box-shadow: 0 12px 24px -18px rgba(127, 29, 29, 0.7);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .admin-actions button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 30px -18px rgba(127, 29, 29, 0.8);
+        }
+
+        .admin-meta {
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .admin-status {
+            font-size: 0.9rem;
+            color: #7f1d1d;
         }
 
         footer {
@@ -269,9 +306,9 @@
 </head>
 <body>
     <header>
-        <h1>Friendsgiving RSVP Lounge</h1>
+        <h1>Thanksgiving RSVP Lounge</h1>
         <p class="subtitle">
-            Gather around our digital harvest table! RSVP below with your crew size and potluck specialty so everyone can see what delights are coming to the feast.
+            Gather friends and family for our Thanksgiving feast. RSVP with your crew size and what you're bringing so we can keep the table balanced.
         </p>
     </header>
 
@@ -304,22 +341,45 @@
 
                 <div>
                     <h2 style="font-family: 'Playfair Display', serif; margin-top: 0; color: #7f1d1d;">Who's bringing what</h2>
-                    <p style="color: var(--muted); margin-bottom: 1.5rem;">Check the lineup before you commit—claim something new or double up on the favorites.</p>
+                    <p style="color: var(--muted); margin-bottom: 1.5rem;">Browse the dishes already on deck and see how many seats are spoken for.</p>
                     <div id="rsvp-list" class="rsvp-list"></div>
                     <div id="empty-state" class="empty-state" hidden>No RSVPs yet. Be the first to set the table!</div>
                 </div>
             </div>
         </section>
 
-        <section class="glass-panel">
-            <h2 style="font-family: 'Playfair Display', serif; margin-top: 0; color: #7f1d1d;">Potluck vision board</h2>
-            <p style="color: var(--muted); margin-bottom: 1.5rem;">See what's already claimed and what the feast still craves. Tap an idea before it's gone!</p>
-            <div id="potluck-board" class="potluck-board"></div>
+        <section class="glass-panel admin-portal">
+            <div>
+                <h2>Admin Portal</h2>
+                <p class="admin-meta">Sign in to edit or remove RSVP entries.</p>
+            </div>
+            <div id="admin-login" class="admin-card">
+                <form id="admin-login-form" class="admin-login-form">
+                    <div>
+                        <label for="admin-username">Username</label>
+                        <input type="text" id="admin-username" autocomplete="username" required />
+                    </div>
+                    <div>
+                        <label for="admin-password">Password</label>
+                        <input type="password" id="admin-password" autocomplete="current-password" required />
+                    </div>
+                    <button type="submit">Log In</button>
+                    <p id="admin-login-error" class="admin-status" hidden>Incorrect credentials. Please try again.</p>
+                </form>
+            </div>
+            <div id="admin-panel" class="admin-card" hidden>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                    <p class="admin-status" id="admin-welcome" style="margin: 0;">Signed in as admin.</p>
+                    <button id="admin-logout" type="button">Log Out</button>
+                </div>
+                <div id="admin-rsvp-list" class="admin-list" style="margin-top: 1.5rem;"></div>
+                <p id="admin-empty" class="admin-meta" hidden>No RSVPs to manage yet.</p>
+            </div>
         </section>
     </main>
 
     <footer>
-        Crafted with gratitude and good vibes. Save room for dessert! 🍂
+        Crafted with gratitude for every guest. Save room for dessert! 🍂
     </footer>
 
     <template id="rsvp-template">
@@ -335,38 +395,25 @@
         </article>
     </template>
 
-    <template id="potluck-template">
-        <article class="potluck-item">
-            <h4 class="title"></h4>
-            <p class="status"></p>
-            <p class="claimed-by" style="margin-top: 0.75rem; color: var(--muted);"></p>
-        </article>
-    </template>
-
     <script>
-        const RSVP_STORAGE_KEY = 'friendsgiving-rsvps';
-        const potluckIdeas = [
-            'Herb Butter Turkey',
-            'Garlic Mashed Potatoes',
-            'Cranberry Orange Relish',
-            'Sourdough Stuffing',
-            'Roasted Root Veggies',
-            'Sweet Potato Casserole',
-            'Autumn Harvest Salad',
-            'Pumpkin Cheesecake',
-            'Pecan Pie Bars',
-            'Mulled Cider Station',
-            'Charcuterie & Cheese Board',
-            'Vegan Main Course'
-        ];
+        const RSVP_STORAGE_KEY = 'thanksgiving-rsvps';
+        const ADMIN_USERNAME = 'ttoulouse';
+        const ADMIN_PASSWORD = '1Em0nz$%';
 
         const form = document.getElementById('rsvp-form');
         const rsvpList = document.getElementById('rsvp-list');
         const emptyState = document.getElementById('empty-state');
-        const potluckBoard = document.getElementById('potluck-board');
+        const adminLoginCard = document.getElementById('admin-login');
+        const adminPanel = document.getElementById('admin-panel');
+        const adminList = document.getElementById('admin-rsvp-list');
+        const adminEmpty = document.getElementById('admin-empty');
+        const adminLoginForm = document.getElementById('admin-login-form');
+        const adminLoginError = document.getElementById('admin-login-error');
+        const adminLogoutButton = document.getElementById('admin-logout');
 
         const rsvpTemplate = document.getElementById('rsvp-template');
-        const potluckTemplate = document.getElementById('potluck-template');
+        let entries = [];
+        let editingId = null;
 
         const loadRsvps = () => {
             try {
@@ -386,15 +433,37 @@
             }
         };
 
-        const renderRsvps = (entries) => {
+        const ensureIds = (list) =>
+            list.map((entry) => {
+                const createdAt = entry.createdAt || Date.now();
+                return {
+                    ...entry,
+                    createdAt,
+                    id: entry.id || `${createdAt}-${Math.random().toString(16).slice(2)}`,
+                };
+            });
+
+        const setSubmitLabel = () => {
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.textContent = editingId ? 'Update RSVP' : 'Reserve My Seat';
+        };
+
+        const resetForm = () => {
+            form.reset();
+            form.querySelector('#guest-count').value = 1;
+            editingId = null;
+            setSubmitLabel();
+        };
+
+        const renderRsvps = (list) => {
             rsvpList.innerHTML = '';
-            if (!entries.length) {
+            if (!list.length) {
                 emptyState.hidden = false;
                 return;
             }
             emptyState.hidden = true;
 
-            entries.forEach((entry) => {
+            list.forEach((entry) => {
                 const node = rsvpTemplate.content.cloneNode(true);
                 node.querySelector('.name').textContent = entry.guestName;
                 node.querySelector('.guests').textContent = `${entry.guestCount} attending`;
@@ -406,54 +475,137 @@
                 } else {
                     notesEl.hidden = true;
                 }
+                const article = node.querySelector('.rsvp-card');
+                article.dataset.entryId = entry.id;
+
                 rsvpList.appendChild(node);
             });
         };
 
-        const renderPotluckBoard = (entries) => {
-            const claimedMap = new Map(entries.map((entry) => [entry.potluckItem.toLowerCase(), entry.guestName]));
-            potluckBoard.innerHTML = '';
+        const renderAdminList = (list) => {
+            adminList.innerHTML = '';
+            if (!list.length) {
+                adminEmpty.hidden = false;
+                return;
+            }
+            adminEmpty.hidden = true;
 
-            potluckIdeas.forEach((idea) => {
-                const node = potluckTemplate.content.cloneNode(true);
-                node.querySelector('.title').textContent = idea;
-                const claimedBy = claimedMap.get(idea.toLowerCase());
-                const statusEl = node.querySelector('.status');
-                const claimedText = node.querySelector('.claimed-by');
+            list.forEach((entry) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'admin-row';
 
-                if (claimedBy) {
-                    statusEl.textContent = 'Claimed';
-                    statusEl.classList.add('claimed');
-                    claimedText.textContent = `Handled with care by ${claimedBy}.`;
-                } else {
-                    statusEl.textContent = 'Available';
-                    statusEl.classList.add('available');
-                    claimedText.textContent = 'Still up for grabs—put your spin on it!';
+                const nameEl = document.createElement('strong');
+                nameEl.textContent = entry.guestName;
+                wrapper.appendChild(nameEl);
+
+                const dishEl = document.createElement('span');
+                dishEl.className = 'admin-meta';
+                dishEl.textContent = `${entry.guestCount} attending · ${entry.potluckItem}`;
+                wrapper.appendChild(dishEl);
+
+                if (entry.notes) {
+                    const notesEl = document.createElement('span');
+                    notesEl.className = 'admin-meta';
+                    notesEl.textContent = `Notes: ${entry.notes}`;
+                    wrapper.appendChild(notesEl);
                 }
 
-                potluckBoard.appendChild(node);
+                const actions = document.createElement('div');
+                actions.className = 'admin-actions';
+
+                const editButton = document.createElement('button');
+                editButton.type = 'button';
+                editButton.textContent = 'Edit';
+                editButton.addEventListener('click', () => {
+                    editingId = entry.id;
+                    form.guestName.value = entry.guestName;
+                    form.guestCount.value = entry.guestCount;
+                    form.potluckItem.value = entry.potluckItem;
+                    form.notes.value = entry.notes || '';
+                    setSubmitLabel();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+                const deleteButton = document.createElement('button');
+                deleteButton.type = 'button';
+                deleteButton.textContent = 'Remove';
+                deleteButton.addEventListener('click', () => {
+                    entries = entries.filter((item) => item.id !== entry.id);
+                    saveRsvps(entries);
+                    refreshViews();
+                    if (editingId === entry.id) {
+                        resetForm();
+                    }
+                });
+
+                actions.append(editButton, deleteButton);
+                wrapper.appendChild(actions);
+                adminList.appendChild(wrapper);
             });
         };
 
-        const entries = loadRsvps();
-        renderRsvps(entries);
-        renderPotluckBoard(entries);
+        const refreshViews = () => {
+            const getTime = (item) => item.createdAt ?? item.updatedAt ?? 0;
+            const sorted = [...entries].sort((a, b) => getTime(a) - getTime(b));
+            renderRsvps(sorted);
+            renderAdminList(sorted);
+        };
+
+        entries = ensureIds(loadRsvps());
+        saveRsvps(entries);
+        refreshViews();
+        setSubmitLabel();
 
         form.addEventListener('submit', (event) => {
             event.preventDefault();
             const formData = new FormData(form);
             const entry = Object.fromEntries(formData.entries());
             entry.guestCount = Number(entry.guestCount) || 1;
-            entry.createdAt = Date.now();
+            const timestamp = Date.now();
 
-            const currentEntries = loadRsvps();
-            currentEntries.push(entry);
-            currentEntries.sort((a, b) => a.createdAt - b.createdAt);
-            saveRsvps(currentEntries);
-            renderRsvps(currentEntries);
-            renderPotluckBoard(currentEntries);
-            form.reset();
-            form.querySelector('#guest-count').value = 1;
+            if (editingId) {
+                entries = entries.map((item) =>
+                    item.id === editingId
+                        ? { ...item, ...entry, guestCount: entry.guestCount, updatedAt: timestamp }
+                        : item
+                );
+            } else {
+                entries.push({
+                    ...entry,
+                    id: `${timestamp}-${Math.random().toString(16).slice(2)}`,
+                    guestCount: entry.guestCount,
+                    createdAt: timestamp,
+                });
+            }
+
+            saveRsvps(entries);
+            refreshViews();
+            resetForm();
+        });
+
+        adminLoginForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const username = adminLoginForm.querySelector('#admin-username').value.trim();
+            const password = adminLoginForm.querySelector('#admin-password').value;
+
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                adminLoginCard.hidden = true;
+                adminPanel.hidden = false;
+                adminLoginError.hidden = true;
+                adminLoginForm.reset();
+            } else {
+                adminLoginError.hidden = false;
+            }
+        });
+
+        adminLoginForm.addEventListener('input', () => {
+            adminLoginError.hidden = true;
+        });
+
+        adminLogoutButton.addEventListener('click', () => {
+            adminPanel.hidden = true;
+            adminLoginCard.hidden = false;
+            resetForm();
         });
     </script>
 </body>
